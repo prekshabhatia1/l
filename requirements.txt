@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+prometheus_client
+pydantic-settings
+prometheus_client

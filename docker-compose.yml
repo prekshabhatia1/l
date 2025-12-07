@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Links the persistent volume (defined below) to the container's /data directory
+      - db_data:/data
+    environment:
+      # Loads the WEBHOOK_SECRET value from your project's .env file
+      - WEBHOOK_SECRET
+      # Defines the internal path for the SQLite database
+      - DATABASE_URL=sqlite:////data/app.db
+    restart: always
+
+# --- REQUIRED TOP-LEVEL SECTION ---
+# This explicitly defines the persistent volume used for the database.
+volumes:
+  db_data:
