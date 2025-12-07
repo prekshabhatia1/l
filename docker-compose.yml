@@ -10,7 +10,7 @@ services:
       - db_data:/data
     environment:
       # Loads the WEBHOOK_SECRET value from your project's .env file
-      - WEBHOOK_SECRET
+      - WEBHOOK_SECRET: "testsecret"
       # Defines the internal path for the SQLite database
       - DATABASE_URL=sqlite:////data/app.db
     restart: always

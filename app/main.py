@@ -270,6 +270,9 @@ async def log_and_measure(request: Request, call_next):
 # =====================================================
 # SIGNATURE VERIFICATION DEPENDENCY
 # =====================================================
+# =====================================================
+# SIGNATURE VERIFICATION DEPENDENCY
+# =====================================================
 async def verify_signature(request: Request):
     sig = request.headers.get("x-signature")
     if not sig:
@@ -277,18 +280,32 @@ async def verify_signature(request: Request):
         WEBHOOK_RESULTS.labels("invalid_signature").inc()
         raise HTTPException(status_code=401, detail="invalid signature")
 
+    # 1. READ THE RAW BODY BYTES
     body = await request.body()
+    
+    # ...
+    # 1. READ THE RAW BODY BYTES
+    body = await request.body()
+    
+    # 2. FIX: Strip the secret of any invisible leading/trailing whitespace/newlines
+    CLEAN_SECRET = WEBHOOK_SECRET.strip() 
+
+    # 3. COMPUTE THE HMAC DIGEST (using the clean secret)
     calc = hmac.new(
-        WEBHOOK_SECRET.encode(),
-        body,
+        CLEAN_SECRET.encode(),    # <-- USE THE CLEAN SECRET HERE
+        body, 
         hashlib.sha256
     ).hexdigest()
+# ...
 
+    # 3. COMPARE THE DIGESTS (Crucial: hmac.compare_digest)
     if not hmac.compare_digest(calc, sig):
         request.state.status = 401
         WEBHOOK_RESULTS.labels("invalid_signature").inc()
         raise HTTPException(status_code=401, detail="invalid signature")
+    
 
+    # SUCCESS: Execution continues to the webhook handler.
 
 # =====================================================
 # ENDPOINTS
